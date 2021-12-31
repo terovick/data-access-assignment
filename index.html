@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>- Quiz -</title>
+</head>
+
+<body>
+    <script>
+        var locStorage = [];
+
+        fetch("./quiz.json")
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                var qIndex = 1;
+                var answerId = 1;
+
+                for (let [key, value] of Object.entries(data.quiz)) {
+                    document.body.innerHTML += `<h1>Question ${qIndex++}: ${value.question}</h1>`;
+                    value.options.forEach((element) => {
+                        document.body.innerHTML += `<input type='radio' class='answers' id='answer_id${answerId++}' name='${key}' value='${element}'><label for='${element}'>${element}</label><br>`;
+                    });
+                }
+
+                var answers = document.querySelectorAll('.answers');
+                var answerText = document.querySelectorAll('.answerText')
+
+                var correctAnswers = [];
+                for (let value of Object.values(data.quiz)) {
+                    correctAnswers.push(value.answer)
+                }
+
+                answers.forEach(element => {
+                    element.onclick = (e) => {
+                        if (correctAnswers.includes(e.target.value)) {
+                            var selectedAnswer = document.querySelector(`label[for='${e.target.value}'`);
+
+                        if (!(selectedAnswer.childNodes.length > 1)) {
+                            document.querySelector(`label[for='${e.target.value}'`).innerHTML += '<b><i class="rig" style="margin-left:8px">Right</i></b>';
+                            }
+                        } else {
+                            document.querySelector(`label[for='${e.target.value}'`).innerHTML += '<b><i class="wro" style="margin-left:8px">Wrong</i></b>';
+                        }
+
+                        answers.forEach(e => {
+                            if (e.checked) {
+                                locStorage.push(new item(e.getAttribute('id'), e.value))
+                                for (let i = 0; i < locStorage.length; i++) {
+                                    localStorage.setItem(locStorage[i].key, locStorage[i].value)
+                                }
+                                for (let i = 1; i < answers.length; i++) {
+                                    var checkElement = document.querySelector(`#answer_id${i}`)
+                                    if (checkElement.checked == false) {
+                                        localStorage.removeItem(checkElement.getAttribute('id'))
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                });
+
+                setTimeout(window.onload = function () {
+                    for (let key in localStorage) {
+                        locStorage.push(key)
+                        if (locStorage.includes(key)) {
+                            answers.forEach(e => {
+                                if (e.getAttribute('id') == key) {
+                                    e.checked = true;
+                                }
+                            })
+                        }
+                    }
+
+                }, 1000)
+            });
+    </script>
+</body>
+
+</html>
